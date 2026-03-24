@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-sky-500: #0ea5e9;
+  --color-sky-600: #0284c7;
+  --color-sky-700: #0369a1;
+  --color-teal-50: #f0fdfa;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --shadow-cq-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-cq-md: 0 4px 6px -1px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+  --shadow-cq-lg: 0 10px 25px -5px rgb(245 158 11 / 0.12), 0 8px 10px -6px rgb(15 23 42 / 0.05);
+  --radius-cq-xl: 1rem;
+  --radius-cq-2xl: 1.25rem;
+  /* Spacing rhythm (sections, forms) */
+  --dp-section-y: 3.5rem;
+  --dp-section-y-lg: 5rem;
+  --dp-form-gap: 1.25rem;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Passport / ticket subtle texture on main app shell */
+.cq-app-shell {
+  background-color: #fffefb;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgb(254 243 199 / 0.45), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, rgb(224 242 254 / 0.35), transparent 45%),
+    radial-gradient(ellipse 60% 40% at 0% 80%, rgb(240 253 250 / 0.4), transparent 40%);
+}
+
+.cq-heading {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+
+/* Consistent vertical section spacing on marketing + dashboard-like pages */
+.dp-section {
+  padding-top: var(--dp-section-y);
+  padding-bottom: var(--dp-section-y);
+}
+@media (min-width: 768px) {
+  .dp-section {
+    padding-top: var(--dp-section-y-lg);
+    padding-bottom: var(--dp-section-y-lg);
+  }
+}
+
+.dp-container {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Homepage: subtle marquee + featured rail (respects prefers-reduced-motion) */
+@keyframes cq-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cq-featured-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.cq-marquee-fade {
+  overflow: hidden;
+}
+
+.cq-marquee-track {
+  display: flex;
+  align-items: center;
+}
+
+/* Desktop: single-line infinite marquee */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .cq-marquee-fade {
+    mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  }
+
+  .cq-marquee-track {
+    width: max-content;
+    flex-wrap: nowrap;
+    animation: cq-marquee-scroll 58s linear infinite;
+  }
+
+  .cq-marquee-group:hover .cq-marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cq-marquee-group .cq-marquee-track {
+    animation: none !important;
+    width: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.5rem;
+    column-gap: 0.75rem;
+  }
+
+  .cq-marquee-fade {
+    mask-image: none;
+    overflow: visible;
+  }
+}
+
+.cq-featured-track {
+  width: max-content;
+}
+
+/* Desktop-only infinite rail (mobile uses a separate scroll row in markup). */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .cq-featured-track--loop {
+    animation: cq-featured-scroll 95s linear infinite;
+  }
+
+  .cq-featured-inner--desktop:hover .cq-featured-track--loop {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cq-featured-track--loop {
+    animation: none !important;
+  }
+
+  .cq-featured-inner--desktop {
+    overflow-x: auto;
+  }
+}
