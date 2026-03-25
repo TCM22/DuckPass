@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
 
   const isProtected =
     path.startsWith('/dashboard') ||
+    path.startsWith('/account') ||
     path.startsWith('/admin') ||
     path.startsWith('/account-suspended');
 
@@ -54,6 +55,7 @@ export async function updateSession(request: NextRequest) {
   const needsProfileChecks =
     user &&
     (path.startsWith('/dashboard') ||
+      path.startsWith('/account') ||
       path.startsWith('/admin') ||
       path.startsWith('/account-suspended'));
 

@@ -94,6 +94,7 @@ async function loadFeatured(): Promise<FeaturedDuckCard[]> {
       .from('ducks')
       .select('id, name, slug, photo_url, launch_ship, launch_cruise, status, check_in_count')
       .eq('status', 'active')
+      .not('owner_id', 'is', null)
       .order('check_in_count', { ascending: false })
       .limit(12);
 

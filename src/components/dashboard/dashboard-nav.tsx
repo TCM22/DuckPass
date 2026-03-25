@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 const baseLinks = [
   { href: '/dashboard', label: 'Passports', sub: 'Overview' },
   { href: '/dashboard/ducks/new', label: 'New passport', sub: 'Register a duck' },
+  { href: '/account/settings', label: 'Account', sub: 'Email & password' },
 ] as const;
 
 export function DashboardNav({ isAdmin = false }: { isAdmin?: boolean }) {
@@ -25,7 +26,9 @@ export function DashboardNav({ isAdmin = false }: { isAdmin?: boolean }) {
               (pathname.startsWith('/dashboard/ducks/') && !pathname.startsWith('/dashboard/ducks/new'))
             : href === '/admin'
               ? pathname.startsWith('/admin')
-              : pathname.startsWith(href);
+              : href === '/account/settings'
+                ? pathname.startsWith('/account')
+                : pathname.startsWith(href);
         return (
           <Link
             key={href}

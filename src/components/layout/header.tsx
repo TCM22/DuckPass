@@ -62,6 +62,12 @@ export function Header() {
               >
                 Register duck
               </Link>
+              <Link
+                href="/account/settings"
+                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-900 min-[900px]:px-4"
+              >
+                Account
+              </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="ml-0.5 shrink-0">
                 Log out
               </Button>
@@ -113,6 +119,13 @@ export function Header() {
                   onClick={() => setMenuOpen(false)}
                 >
                   Register duck
+                </Link>
+                <Link
+                  href="/account/settings"
+                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 hover:bg-amber-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Account
                 </Link>
                 <button
                   type="button"

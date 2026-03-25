@@ -11,11 +11,12 @@ export interface Profile {
   updated_at: string;
 }
 
-export type DuckOwnershipSource = 'app' | 'tag_presale' | 'transfer';
+export type DuckOwnershipSource = 'app' | 'tag_presale' | 'transfer' | 'unclaimed';
 
 export interface Duck {
   id: string;
-  owner_id: string;
+  /** Null when the duck is not yet claimed (e.g. physical tag inventory). */
+  owner_id: string | null;
   slug: string;
   name: string;
   description: string;
@@ -35,7 +36,7 @@ export interface Duck {
 }
 
 export interface DuckWithProfile extends Duck {
-  profiles: Pick<Profile, 'display_name' | 'avatar_url'>;
+  profiles: Pick<Profile, 'display_name' | 'avatar_url'> | null;
 }
 
 export interface CheckIn {

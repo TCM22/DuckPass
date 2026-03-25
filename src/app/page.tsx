@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { BRAND } from '@/lib/brand';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/server';
 import { HomeClosingCta, HomeHeroAuthButtons } from '@/components/home/home-cta-buttons';
 import { HomeMarquee } from '@/components/home/home-marquee';
 import { FeaturedDucksRail, FeaturedDucksRailSkeleton } from '@/components/home/featured-ducks-rail';
@@ -47,7 +48,13 @@ const features = [
 const cardBase =
   'rounded-2xl border border-slate-200/90 bg-white/95 p-5 shadow-[var(--shadow-cq-sm)] ring-1 ring-slate-900/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-200/90 hover:shadow-[var(--shadow-cq-md)] sm:p-6';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
   return (
     <div>
       <HomeMarquee />
@@ -74,7 +81,7 @@ export default function HomePage() {
           <p className="mx-auto mt-3 max-w-xl text-sm text-slate-500">
             Finders can report a sighting without creating an account. You keep the passports; they add the stamps.
           </p>
-          <HomeHeroAuthButtons />
+          <HomeHeroAuthButtons isLoggedIn={isLoggedIn} />
         </div>
       </section>
 
@@ -163,7 +170,7 @@ export default function HomePage() {
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-amber-50/95">
             Join {BRAND.name} and give your ducks passports that travel. Free to start—your dashboard is waiting.
           </p>
-          <HomeClosingCta />
+          <HomeClosingCta isLoggedIn={isLoggedIn} />
         </div>
       </section>
     </div>

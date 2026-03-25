@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import type { AuthModalTab } from '@/components/auth/auth-types';
+import { getAuthSiteOrigin } from '@/lib/site-url';
 
 type Props = {
   open: boolean;
@@ -198,6 +199,15 @@ function ModalLoginForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-semibold text-amber-700 hover:underline"
+            onClick={onSuccess}
+          >
+            Forgot password?
+          </Link>
+        </div>
         <Button type="submit" loading={loading} className="w-full" size="md">
           Log in
         </Button>
@@ -227,13 +237,13 @@ function ModalSignupForm({ onSuccess }: { onSuccess: () => void }) {
     setLoading(true);
     try {
       const emailTrimmed = email.trim();
-      const origin = window.location.origin;
+      const siteUrl = getAuthSiteOrigin();
       const { data, error } = await supabase.auth.signUp({
         email: emailTrimmed,
         password,
         options: {
           data: { display_name: displayName.trim() },
-          emailRedirectTo: `${origin}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
         },
       });
       if (error) {

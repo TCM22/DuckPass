@@ -52,7 +52,9 @@ export default async function AdminPage() {
       .limit(50),
   ]);
 
-  const ownerIds = [...new Set((ducks || []).map((d) => d.owner_id))];
+  const ownerIds = [
+    ...new Set((ducks || []).map((d) => d.owner_id).filter((id): id is string => Boolean(id))),
+  ];
   let ownerNames = new Map<string, string>();
   if (ownerIds.length > 0) {
     const { data: owners } = await supabase
@@ -240,8 +242,8 @@ export default async function AdminPage() {
                       </span>
                     </td>
                     <td className="max-w-40 px-4 py-3">
-                      <span className="block truncate text-slate-600" title={ownerNames.get(d.owner_id)}>
-                        {ownerNames.get(d.owner_id) ?? '—'}
+                      <span className="block truncate text-slate-600" title={d.owner_id ? ownerNames.get(d.owner_id) : undefined}>
+                        {d.owner_id ? (ownerNames.get(d.owner_id) ?? '—') : 'Unclaimed'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{d.status}</td>
@@ -302,8 +304,8 @@ export default async function AdminPage() {
                   <dl className="grid grid-cols-2 gap-2 text-sm text-slate-600">
                     <div>
                       <dt className="text-xs font-medium text-slate-500">Owner</dt>
-                      <dd className="truncate" title={ownerNames.get(d.owner_id)}>
-                        {ownerNames.get(d.owner_id) ?? '—'}
+                      <dd className="truncate" title={d.owner_id ? ownerNames.get(d.owner_id) : undefined}>
+                        {d.owner_id ? (ownerNames.get(d.owner_id) ?? '—') : 'Unclaimed'}
                       </dd>
                     </div>
                     <div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import {
   validateImageFileForUpload,
 } from '@/lib/photo-storage';
 import { compressImageForUpload } from '@/lib/image-compress';
+import { linkButtonClass } from '@/lib/button-styles';
 
 const actionOptions = [
   { value: 'found', label: '🦆 I found this duck' },
@@ -144,6 +146,26 @@ export default function CheckInPage() {
           🔍
         </div>
         <p className="text-slate-500">Loading duck…</p>
+      </div>
+    );
+  }
+
+  if (!duck.owner_id) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-10">
+        <Card className="border-amber-100/90 p-6 text-center shadow-[var(--shadow-cq-md)]">
+          <p className="text-lg font-semibold text-slate-900">This passport isn&apos;t activated yet</p>
+          <p className="mt-2 text-sm text-slate-600">
+            Someone still needs to claim this duck before finder check-ins apply. Open the duck page to claim it with
+            your account.
+          </p>
+          <Link
+            href={`/duck/${slug}`}
+            className={linkButtonClass('primary', 'lg', 'mt-6 inline-flex w-full justify-center sm:w-auto')}
+          >
+            View duck page
+          </Link>
+        </Card>
       </div>
     );
   }

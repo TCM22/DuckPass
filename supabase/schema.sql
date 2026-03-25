@@ -29,7 +29,7 @@ create index idx_profiles_role on public.profiles(role);
 -- ============================================================
 create table public.ducks (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references public.profiles(id) on delete cascade,
+  owner_id uuid references public.profiles(id) on delete cascade,
   slug text not null unique,
   name text not null,
   description text default '',
@@ -40,7 +40,7 @@ create table public.ducks (
   launch_date date,
   photo_url text,
   check_in_count int not null default 0,
-  ownership_source text not null default 'app' check (ownership_source in ('app', 'tag_presale', 'transfer')),
+  ownership_source text not null default 'app' check (ownership_source in ('app', 'tag_presale', 'transfer', 'unclaimed')),
   claimed_at timestamptz default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -119,6 +119,19 @@ create policy "Owners can update own ducks"
 
 create policy "Owners can delete own ducks"
   on public.ducks for delete using (auth.uid() = owner_id);
+
+create policy "Authenticated users can claim unclaimed ducks"
+  on public.ducks for update
+  using (owner_id is null and ownership_source = 'unclaimed')
+  with check (auth.uid() = owner_id and ownership_source = 'app');
+
+create policy "Admins can insert unclaimed ducks"
+  on public.ducks for insert
+  with check (
+    owner_id is null
+    and ownership_source = 'unclaimed'
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );
 
 create policy "Admins can update any duck"
   on public.ducks for update

@@ -21,9 +21,11 @@ export default async function DashboardPage() {
 
   const { data: profileRow } = await supabase
     .from('profiles')
-    .select('plan, duck_limit')
+    .select('plan, duck_limit, display_name')
     .eq('id', user.id)
     .maybeSingle();
+
+  const welcomeName = profileRow?.display_name?.trim() || user.email || 'there';
 
   const { data: ducks } = await supabase
     .from('ducks')
@@ -70,42 +72,44 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-amber-200/50 bg-gradient-to-br from-white via-amber-50/40 to-sky-50/50 px-5 py-8 shadow-[var(--shadow-cq-md)] sm:px-8 sm:py-10">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-amber-300/20 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-sky-300/15 blur-3xl" aria-hidden />
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
-          <div className="min-w-0 flex-1 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/80">Passport desk</p>
-            <h1 className="cq-heading text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
-              Your ducks at a glance
-            </h1>
-            <p className="max-w-xl text-base leading-relaxed text-slate-600">
-              Register ducks, attach QR or NFC, and follow every finder check-in—same calm hub, trip after trip.
-            </p>
-            {hasDucks && (
-              <p className="pt-1 text-sm leading-relaxed text-slate-600">
-                Tracking{' '}
-                <strong className="text-slate-800">{ducks!.length}</strong> passport
-                {ducks!.length !== 1 ? 's' : ''}. Finder check-ins show up in Recent activity below.
+      <div className="space-y-3">
+        <section className="relative overflow-hidden rounded-3xl border border-amber-200/50 bg-gradient-to-br from-white via-amber-50/40 to-sky-50/50 px-5 py-8 shadow-[var(--shadow-cq-md)] sm:px-8 sm:py-10">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-amber-300/20 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-sky-300/15 blur-3xl" aria-hidden />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+            <div className="min-w-0 max-w-xl flex-1 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/80">Passport desk</p>
+              <h1 className="cq-heading text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
+                Your ducks at a glance
+              </h1>
+              <p className="text-base font-medium leading-snug text-slate-600 sm:text-lg">
+                Welcome back, {welcomeName} 👋
               </p>
-            )}
+              <p className="text-base leading-relaxed text-slate-600">
+                Register ducks, attach QR or NFC, and follow every finder check-in—same calm hub, trip after trip.
+              </p>
+              {hasDucks && (
+                <p className="pt-1 text-sm leading-relaxed text-slate-600">
+                  Tracking{' '}
+                  <strong className="text-slate-800">{ducks!.length}</strong> passport
+                  {ducks!.length !== 1 ? 's' : ''}. Finder check-ins show up in Recent activity below.
+                </p>
+              )}
+            </div>
+            <div className="flex w-full shrink-0 flex-col gap-3 sm:flex-row sm:justify-end lg:mt-1 lg:w-auto lg:flex-col lg:items-end lg:justify-start lg:gap-3">
+              <Link
+                href="/dashboard/ducks/new"
+                className={linkButtonClass('primary', 'lg', 'w-full min-w-0 sm:w-auto sm:min-w-[12.5rem]')}
+              >
+                + Register a duck
+              </Link>
+              <Link href="/claim" className={linkButtonClass('subtle', 'lg', 'w-full min-w-0 sm:w-auto sm:min-w-[12.5rem]')}>
+                Claim a duck
+              </Link>
+            </div>
           </div>
-          <div className="flex w-full shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto lg:max-w-md lg:justify-end">
-            <Link
-              href="/dashboard/ducks/new"
-              className={linkButtonClass('primary', 'lg', 'w-full min-w-0 sm:w-auto sm:min-w-[12.5rem]')}
-            >
-              + Register a duck
-            </Link>
-            <Link
-              href="/"
-              className={linkButtonClass('subtle', 'lg', 'w-full min-w-0 border-2 sm:w-auto sm:min-w-[10rem]')}
-            >
-              View site
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Stats */}
       <section>

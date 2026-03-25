@@ -9,6 +9,8 @@ import type { DuckWithProfile, CheckIn } from '@/lib/types';
 import { PublicPassportShare } from '@/components/ducks/public-passport-share';
 import { PassportQrSection } from '@/components/ducks/passport-qr-section';
 import { PublicDuckScanTracker } from '@/components/ducks/public-duck-scan-tracker';
+import { UnclaimedDuckClaim } from '@/components/ducks/unclaimed-duck-claim';
+import type { UnclaimedDuckForClaim } from '@/components/ducks/unclaimed-duck-claim';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -64,6 +66,10 @@ function JourneyMapPlaceholder({ hints }: { hints: string[] }) {
   );
 }
 
+function isUnclaimedForClaim(duck: DuckWithProfile): duck is DuckWithProfile & UnclaimedDuckForClaim {
+  return duck.owner_id === null && duck.ownership_source === 'unclaimed';
+}
+
 export default async function PublicDuckPage({ params }: PageProps) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -75,6 +81,19 @@ export default async function PublicDuckPage({ params }: PageProps) {
     .single()) as { data: DuckWithProfile | null };
 
   if (!duck) notFound();
+
+  if (isUnclaimedForClaim(duck)) {
+    return (
+      <>
+        <PublicDuckScanTracker duckId={duck.id} />
+        <UnclaimedDuckClaim duck={duck} />
+      </>
+    );
+  }
+
+  if (duck.owner_id === null) {
+    notFound();
+  }
 
   const { data: checkIns } = (await supabase
     .from('check_ins')

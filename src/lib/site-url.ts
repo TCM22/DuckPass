@@ -21,3 +21,19 @@ export function getPublicSiteUrlFallback(): string {
 export function getClientPublicSiteOrigin(): string {
   return getConfiguredSiteOrigin() || getPublicSiteUrlFallback();
 }
+
+/**
+ * Base origin for Supabase auth redirects (`emailRedirectTo`, `redirectTo`).
+ * Prefer `NEXT_PUBLIC_SITE_URL` (or legacy `NEXT_PUBLIC_APP_URL`); falls back to `http://localhost:3000` when unset.
+ * Add this origin to Supabase → Authentication → URL Configuration → Redirect URLs.
+ */
+export function getAuthSiteOrigin(): string {
+  return getClientPublicSiteOrigin();
+}
+
+/** Full URL for Supabase `resetPasswordForEmail` — must be listed in Supabase Auth redirect URLs. */
+export function getPasswordRecoveryRedirectUrl(): string {
+  const origin = getAuthSiteOrigin();
+  const next = encodeURIComponent('/account/reset-password');
+  return `${origin}/auth/callback?next=${next}`;
+}
