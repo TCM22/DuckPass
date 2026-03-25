@@ -1,10 +1,16 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CopyLinkButton } from '@/components/ducks/copy-link-button';
 import { linkButtonClass } from '@/lib/button-styles';
 import { cn } from '@/lib/utils';
 
+/**
+ * Web Share must be detected after mount only. Reading `navigator` during render
+ * makes SSR output (no button) differ from the client's first paint (button on
+ * supporting devices) and triggers hydration errors.
+ */
 function NativeShareButton({
   url,
   title,
@@ -16,8 +22,13 @@ function NativeShareButton({
   text?: string;
   className?: string;
 }) {
-  const canShare =
-    typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    // Deferred after paint so server markup matches first client paint (no hydration mismatch).
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: navigator only on client
+    setCanShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  }, []);
 
   if (!canShare) return null;
 
@@ -46,7 +57,6 @@ function NativeShareButton({
  */
 export function PublicPassportShare({
   publicUrl,
-  slug: _slug,
   duckName,
   className,
   compact = false,

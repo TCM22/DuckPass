@@ -11,16 +11,40 @@ interface Props {
 
 export function QRCodeDisplay({ url, duckName }: Props) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const target = url.trim();
-    if (!target) return;
-    QRCode.toDataURL(target, {
-      width: 280,
-      margin: 2,
-      color: { dark: '#1f2937', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-    }).then(setQrDataUrl);
+    let cancelled = false;
+
+    const run = () => {
+      if (cancelled) return;
+      if (!target) {
+        setQrDataUrl(null);
+        setFailed(true);
+        return;
+      }
+      setFailed(false);
+      setQrDataUrl(null);
+      QRCode.toDataURL(target, {
+        width: 280,
+        margin: 2,
+        color: { dark: '#1f2937', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      })
+        .then((data) => {
+          if (!cancelled) setQrDataUrl(data);
+        })
+        .catch(() => {
+          if (!cancelled) setFailed(true);
+        });
+    };
+
+    queueMicrotask(run);
+
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   const handleDownload = () => {
@@ -31,8 +55,16 @@ export function QRCodeDisplay({ url, duckName }: Props) {
     link.click();
   };
 
+  if (failed) {
+    return (
+      <p className="mx-auto max-w-[280px] rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-6 text-sm text-amber-900">
+        Couldn&apos;t generate the QR image. Copy the link above instead—it&apos;s the same address.
+      </p>
+    );
+  }
+
   if (!qrDataUrl) {
-    return <div className="w-[280px] h-[280px] bg-gray-100 rounded-xl animate-pulse mx-auto" />;
+    return <div className="mx-auto h-[280px] w-[280px] animate-pulse rounded-xl bg-slate-100" />;
   }
 
   return (

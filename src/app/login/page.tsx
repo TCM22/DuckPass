@@ -40,7 +40,6 @@ function LoginForm() {
 
     try {
       const emailTrimmed = email.trim();
-      console.log('[login] signInWithPassword', { email: emailTrimmed });
 
       const { error } = await supabase.auth.signInWithPassword({
         email: emailTrimmed,
@@ -54,7 +53,6 @@ function LoginForm() {
         return;
       }
 
-      console.log('[login] success, ensuring profile');
       await ensureProfile(supabase);
 
       toast.success('Welcome back!');

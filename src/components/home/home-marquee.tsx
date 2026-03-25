@@ -13,7 +13,7 @@ const phraseClass =
 export function HomeMarquee() {
   return (
     <div
-      className="cq-marquee-group min-w-0 max-w-full overflow-x-hidden border-b border-amber-200/40 bg-gradient-to-r from-amber-50/95 via-white to-sky-50/90 py-2.5 sm:py-3"
+      className="cq-marquee-group hidden min-w-0 max-w-full overflow-x-hidden border-b border-amber-200/40 bg-gradient-to-r from-amber-50/95 via-white to-sky-50/90 py-2.5 sm:py-3 md:block"
       aria-hidden
     >
       <div className="cq-marquee-fade relative">

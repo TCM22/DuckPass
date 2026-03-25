@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
+import { BackToDashboardButton } from '@/components/ui/back-to-dashboard-button';
 import { createClient } from '@/lib/supabase/server';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,9 +61,7 @@ export default async function DuckManagePage({ params, searchParams }: PageProps
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-800 mb-4 inline-block">
-        ← Back to dashboard
-      </Link>
+      <BackToDashboardButton className="mb-4" />
 
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-8">
         <div>

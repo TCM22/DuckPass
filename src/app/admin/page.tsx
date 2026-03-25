@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { StatCard } from '@/components/dashboard/stat-card';
+import { AdminRemoveStoredPhotoButton } from '@/components/admin/admin-remove-stored-photo-button';
 import { DeleteDuckButton } from '@/components/admin/delete-duck-button';
 import { AdminUserRowActions } from '@/components/admin/admin-user-row-actions';
 import { Card } from '@/components/ui/card';
@@ -41,12 +42,12 @@ export default async function AdminPage() {
       .limit(100),
     supabase
       .from('ducks')
-      .select('id, name, slug, owner_id, status, check_in_count, created_at')
+      .select('id, name, slug, owner_id, status, check_in_count, created_at, photo_url')
       .order('created_at', { ascending: false })
       .limit(100),
     supabase
       .from('check_ins')
-      .select('id, duck_id, finder_name, action, ship_name, port, created_at')
+      .select('id, duck_id, finder_name, action, ship_name, port, created_at, photo_url')
       .order('created_at', { ascending: false })
       .limit(50),
   ]);
@@ -63,7 +64,7 @@ export default async function AdminPage() {
 
   const checkInRows = (recentCheckIns || []) as Pick<
     CheckIn,
-    'id' | 'duck_id' | 'finder_name' | 'action' | 'ship_name' | 'port' | 'created_at'
+    'id' | 'duck_id' | 'finder_name' | 'action' | 'ship_name' | 'port' | 'created_at' | 'photo_url'
   >[];
   const ciDuckIds = [...new Set(checkInRows.map((c) => c.duck_id))];
   let duckMeta = new Map<string, { name: string; slug: string }>();
@@ -78,7 +79,7 @@ export default async function AdminPage() {
   const profileRows = (profiles || []) as Profile[];
   const duckRows = (ducks || []) as Pick<
     Duck,
-    'id' | 'name' | 'slug' | 'owner_id' | 'status' | 'check_in_count' | 'created_at'
+    'id' | 'name' | 'slug' | 'owner_id' | 'status' | 'check_in_count' | 'created_at' | 'photo_url'
   >[];
 
   return (
@@ -215,6 +216,7 @@ export default async function AdminPage() {
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Finds</th>
                 <th className="px-4 py-3">Created</th>
+                <th className="min-w-[140px] px-4 py-3">Photo</th>
                 <th className="px-4 py-3">Public</th>
                 <th className="w-36 px-4 py-3 text-right" />
               </tr>
@@ -222,7 +224,7 @@ export default async function AdminPage() {
             <tbody>
               {duckRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                     No ducks found.
                   </td>
                 </tr>
@@ -245,6 +247,21 @@ export default async function AdminPage() {
                     <td className="px-4 py-3 text-slate-600">{d.status}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-600">{d.check_in_count}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(d.created_at)}</td>
+                    <td className="px-4 py-3 align-top">
+                      {d.photo_url ? (
+                        <div className="flex flex-col gap-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={d.photo_url}
+                            alt=""
+                            className="h-12 w-12 rounded-lg object-cover ring-1 ring-slate-200"
+                          />
+                          <AdminRemoveStoredPhotoButton kind="duck" rowId={d.id} className="w-full max-w-36" />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/duck/${d.slug}`}
@@ -312,6 +329,20 @@ export default async function AdminPage() {
                       Open public passport ↗
                     </Link>
                   </div>
+                  {d.photo_url ? (
+                    <div className="border-t border-slate-100 pt-3">
+                      <p className="mb-2 text-xs font-medium text-slate-500">Passport photo</p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={d.photo_url}
+                          alt=""
+                          className="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200"
+                        />
+                        <AdminRemoveStoredPhotoButton kind="duck" rowId={d.id} />
+                      </div>
+                    </div>
+                  ) : null}
                   <div className="border-t border-slate-100 pt-3">
                     <p className="mb-2 text-xs font-medium text-slate-500">Danger zone</p>
                     <DeleteDuckButton duckId={d.id} duckName={d.name} />
@@ -339,12 +370,13 @@ export default async function AdminPage() {
                 <th className="px-4 py-3">Finder</th>
                 <th className="px-4 py-3">Action</th>
                 <th className="px-4 py-3">Ship / port</th>
+                <th className="min-w-[120px] px-4 py-3">Photo</th>
               </tr>
             </thead>
             <tbody>
               {checkInRows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                     No check-ins yet.
                   </td>
                 </tr>
@@ -380,6 +412,21 @@ export default async function AdminPage() {
                         <span className="block truncate text-slate-500" title={shipPort !== '—' ? shipPort : undefined}>
                           {shipPort}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {c.photo_url ? (
+                          <div className="flex flex-col gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={c.photo_url}
+                              alt=""
+                              className="h-12 w-12 rounded-lg object-cover ring-1 ring-slate-200"
+                            />
+                            <AdminRemoveStoredPhotoButton kind="check_in" rowId={c.id} className="w-full max-w-36" />
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -430,6 +477,20 @@ export default async function AdminPage() {
                     <p className="line-clamp-3 text-sm text-slate-500" title={shipPort !== '—' ? shipPort : undefined}>
                       <span className="font-medium text-slate-500">Ship / port:</span> {shipPort}
                     </p>
+                    {c.photo_url ? (
+                      <div className="border-t border-slate-100 pt-3">
+                        <p className="text-xs font-medium text-slate-500">Check-in photo</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={c.photo_url}
+                            alt=""
+                            className="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200"
+                          />
+                          <AdminRemoveStoredPhotoButton kind="check_in" rowId={c.id} />
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </Card>
               );

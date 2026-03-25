@@ -33,47 +33,55 @@ export function DuckCard({
         : 'Recently active';
 
   return (
-    <Card className="group flex h-full flex-col p-0 overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-cq-lg)] hover:ring-1 hover:ring-amber-300/30">
-      <div className="relative bg-gradient-to-r from-amber-400 via-amber-500 to-sky-500 px-4 py-3 sm:px-5">
+    <Card className="group flex h-full min-h-[22rem] flex-col p-0 overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-cq-lg)] hover:ring-1 hover:ring-amber-300/30 sm:min-h-[23rem]">
+      <div className="relative bg-gradient-to-r from-amber-400 via-amber-500 to-sky-500 px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h20v20H0z\' fill=\'none\'/%3E%3Cpath d=\'M10 0v20M0 10h20\' stroke=\'%23ffffff\' stroke-opacity=\'.12\' stroke-width=\'.5\'/%3E%3C/svg%3E')] opacity-40" />
-        <div className="relative flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-white/95">
+        <div className="relative flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+            <span className="max-w-[11rem] truncate font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-white/95 sm:max-w-none">
               {BRAND.name}
             </span>
             <span className="shrink-0 rounded-md bg-white/20 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white">
               Passport
             </span>
           </div>
-          <Badge variant={statusBadgeVariant(duck.status)} className="border-white/30 bg-white/95 text-xs">
-            {STATUS_LABELS[duck.status] || duck.status}
-          </Badge>
+          <div className="min-w-0 self-start sm:self-center sm:shrink-0">
+            <Badge
+              variant={statusBadgeVariant(duck.status)}
+              className="max-w-full border-white/30 bg-white/95 text-xs"
+            >
+              <span className="block truncate">
+                {STATUS_LABELS[duck.status] || duck.status}
+              </span>
+            </Badge>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="mb-5 flex gap-4">
+      <div className="flex min-h-0 flex-1 flex-col p-5 sm:p-6">
+        <div className="mb-4 flex gap-3 sm:mb-5 sm:gap-4">
           {duck.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={duck.photo_url}
               alt=""
-              className="h-16 w-16 shrink-0 rounded-2xl object-cover shadow-inner ring-1 ring-slate-200/80"
+              className="h-16 w-16 shrink-0 rounded-2xl object-cover object-center shadow-inner ring-1 ring-slate-200/80"
             />
           ) : (
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-sky-50 text-3xl shadow-inner ring-1 ring-amber-100/80">
               🦆
             </div>
           )}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 py-0.5">
             <Link
               href={`/dashboard/ducks/${duck.slug}`}
-              className="cq-heading text-lg font-semibold text-slate-900 transition-colors hover:text-amber-700"
+              className="cq-heading line-clamp-2 text-lg font-semibold leading-snug text-slate-900 transition-colors hover:text-amber-700"
+              title={duck.name}
             >
               {duck.name}
             </Link>
             {duck.description && (
-              <p className="mt-1 line-clamp-2 text-sm text-slate-500">{duck.description}</p>
+              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-500">{duck.description}</p>
             )}
           </div>
         </div>
@@ -108,7 +116,7 @@ export function DuckCard({
           </p>
         )}
 
-        <div className="mt-6 space-y-2 border-t border-slate-100 pt-5">
+        <div className="mt-auto space-y-2 border-t border-slate-100 pt-5">
           <div className="grid grid-cols-2 gap-2">
             <Link href={`/dashboard/ducks/${duck.slug}`} className={linkButtonClass('primary', 'sm', 'min-w-0')}>
               Manage

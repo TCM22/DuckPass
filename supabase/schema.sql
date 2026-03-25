@@ -120,6 +120,12 @@ create policy "Owners can update own ducks"
 create policy "Owners can delete own ducks"
   on public.ducks for delete using (auth.uid() = owner_id);
 
+create policy "Admins can update any duck"
+  on public.ducks for update
+  using (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );
+
 -- Check-ins
 alter table public.check_ins enable row level security;
 
@@ -128,6 +134,12 @@ create policy "Check-ins are viewable by everyone"
 
 create policy "Anyone can insert check-ins"
   on public.check_ins for insert with check (true);
+
+create policy "Admins can update check_ins"
+  on public.check_ins for update
+  using (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );
 
 -- Scan events
 alter table public.scan_events enable row level security;
@@ -247,3 +259,4 @@ grant execute on function public.increment_owner_photo_usage_for_duck(uuid, bigi
 -- STORAGE BUCKET (run separately if needed)
 -- ============================================================
 -- Storage: run migrations/006_storage_duck_photos.sql (or 008 if upgrading) — bucket id `images`.
+-- Also run migrations/009_admin_image_moderation.sql for admin photo removal + MIME allowlist (no GIF).

@@ -2,9 +2,9 @@
 
 import toast from 'react-hot-toast';
 import { linkButtonClass } from '@/lib/button-styles';
-import { cn } from '@/lib/utils';
+import { cn, getDuckUrl } from '@/lib/utils';
 
-/** Copy `/duck/[slug]` using the current browser origin (tunnel-safe). */
+/** Copy full passport URL — uses `getDuckUrl` / `@/lib/site-url` (same rules as server `getPublicSiteUrl` when env is set). */
 export function CopyDuckPassportLink({
   slug,
   className,
@@ -17,7 +17,7 @@ export function CopyDuckPassportLink({
       type="button"
       onClick={async () => {
         try {
-          const url = `${window.location.origin}/duck/${slug}`;
+          const url = getDuckUrl(slug);
           await navigator.clipboard.writeText(url);
           toast.success('Passport link copied');
         } catch {

@@ -34,7 +34,7 @@ export default async function DashboardPage() {
   const duckIds = (ducks || []).map((d: Duck) => d.id);
 
   let recentCheckIns: CheckIn[] = [];
-  let lastSeenByDuck: Record<string, string> = {};
+  const lastSeenByDuck: Record<string, string> = {};
 
   if (duckIds.length > 0) {
     const { data: recent } = await supabase

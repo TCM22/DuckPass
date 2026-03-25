@@ -24,6 +24,7 @@ export function AuthModal({ open, onClose, initialTab }: Props) {
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset tab when modal opens with a new default
       setView(initialTab);
     }
   }, [open, initialTab]);

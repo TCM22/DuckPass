@@ -8,17 +8,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { BackToDashboardButton } from '@/components/ui/back-to-dashboard-button';
 import toast from 'react-hot-toast';
 import {
   ACCEPT_IMAGE,
   PHOTO_INPUT_MAX_BYTES,
+  duckImagePublicUrl,
   duckPhotoPath,
   extFromMime,
+  formatImageUploadError,
   imagesStorage,
   uniqueImageFilename,
+  validateImageFileForUpload,
 } from '@/lib/photo-storage';
 import { compressImageForUpload } from '@/lib/image-compress';
-import { recordMyPhotoUsage } from '@/lib/record-photo-usage';
 
 export default function NewDuckPage() {
   const [name, setName] = useState('');
@@ -71,8 +74,9 @@ export default function NewDuckPage() {
     }
 
     if (photoFile) {
-      if (photoFile.size > PHOTO_INPUT_MAX_BYTES) {
-        toast.error(`Photo must be ${Math.round(PHOTO_INPUT_MAX_BYTES / (1024 * 1024))} MB or smaller.`);
+      const v = validateImageFileForUpload(photoFile);
+      if (v) {
+        toast.error(v);
         setLoading(false);
         return;
       }
@@ -92,12 +96,20 @@ export default function NewDuckPage() {
         upsert: false,
       });
       if (upErr) {
-        toast.error(upErr.message || 'Photo upload failed — duck was still created.');
+        toast.error(formatImageUploadError(upErr.message) + ' Duck was still created.');
       } else {
-        const { data: pub } = imagesStorage(supabase).getPublicUrl(path);
-        await supabase.from('ducks').update({ photo_url: pub.publicUrl }).eq('id', row.id);
-        const { error: usageErr } = await recordMyPhotoUsage(supabase, uploadFile.size);
-        if (usageErr) console.warn('increment_my_photo_usage', usageErr.message);
+        const publicUrl = duckImagePublicUrl(supabase, path);
+        if (!publicUrl?.trim()) {
+          toast.error('Photo uploaded but URL could not be resolved — check NEXT_PUBLIC_SUPABASE_URL.');
+        } else {
+          const { error: photoDbErr } = await supabase
+            .from('ducks')
+            .update({ photo_url: publicUrl })
+            .eq('id', row.id);
+          if (photoDbErr) {
+            toast.error(photoDbErr.message || 'Photo saved to storage but passport could not be updated.');
+          }
+        }
       }
     }
 
@@ -108,6 +120,7 @@ export default function NewDuckPage() {
 
   return (
     <div className="mx-auto max-w-lg">
+      <BackToDashboardButton className="mb-4" />
       <h1 className="cq-heading mb-2 text-3xl font-semibold text-slate-900">Register a new duck</h1>
       <p className="mb-8 text-slate-600">
         Name your duck and add launch details—this becomes the first page of its passport. You can edit the photo
@@ -145,7 +158,7 @@ export default function NewDuckPage() {
               onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
             />
             <p className="mt-1 text-xs text-slate-500">
-              Shown on the public passport · images are resized before upload (original up to{' '}
+              One passport photo · JPEG, PNG, or WebP · resized before upload (up to{' '}
               {Math.round(PHOTO_INPUT_MAX_BYTES / (1024 * 1024))} MB)
             </p>
           </div>

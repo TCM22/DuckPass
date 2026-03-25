@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { DuckPhotoUploadField } from '@/components/ducks/duck-photo-upload-field';
@@ -15,7 +16,12 @@ export function DuckManagePhotoCard({
   initialPhotoUrl: string | null;
 }) {
   const supabase = createClient();
+  const router = useRouter();
   const [photoUrl, setPhotoUrl] = useState<string | null>(initialPhotoUrl);
+
+  useEffect(() => {
+    setPhotoUrl(initialPhotoUrl);
+  }, [initialPhotoUrl]);
 
   return (
     <Card>
@@ -28,7 +34,14 @@ export function DuckManagePhotoCard({
         userId={userId}
         duckId={duckId}
         currentUrl={photoUrl}
-        onUploaded={setPhotoUrl}
+        onUploaded={(url) => {
+          setPhotoUrl(url);
+          router.refresh();
+        }}
+        onRemoved={() => {
+          setPhotoUrl(null);
+          router.refresh();
+        }}
       />
     </Card>
   );

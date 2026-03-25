@@ -1,5 +1,5 @@
 /* DuckPass minimal service worker — enables install / PWA shell; extend for offline later */
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 

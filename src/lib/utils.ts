@@ -1,4 +1,5 @@
 import { customAlphabet } from 'nanoid';
+import { getClientPublicSiteOrigin } from '@/lib/site-url';
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
 const generateId = customAlphabet(alphabet, 8);
@@ -7,9 +8,9 @@ export function generateDuckSlug(): string {
   return generateId();
 }
 
-/** @param baseUrl Optional origin (e.g. from getPublicSiteUrl) so tunnels match the browser host */
+/** @param baseUrl Optional origin (e.g. from `getPublicSiteUrl`) — overrides env */
 export function getDuckUrl(slug: string, baseUrl?: string): string {
-  const base = (baseUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+  const base = (baseUrl ?? getClientPublicSiteOrigin()).replace(/\/$/, '');
   return `${base}/duck/${slug}`;
 }
 

@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import { BRAND, duckPublicDescription, duckPublicTitle } from '@/lib/brand';
 import type { DuckWithProfile, CheckIn } from '@/lib/types';
 import { PublicPassportShare } from '@/components/ducks/public-passport-share';
+import { PassportQrSection } from '@/components/ducks/passport-qr-section';
 import { PublicDuckScanTracker } from '@/components/ducks/public-duck-scan-tracker';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,7 +114,7 @@ export default async function PublicDuckPage({ params }: PageProps) {
               <img
                 src={duck.photo_url}
                 alt=""
-                className="h-40 w-40 rounded-3xl object-cover shadow-lg ring-4 ring-white/90 sm:h-44 sm:w-44"
+                className="aspect-square h-40 w-40 rounded-3xl object-cover object-center shadow-lg ring-4 ring-white/90 sm:h-44 sm:w-44"
               />
             ) : (
               <div className="flex h-40 w-40 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-100 to-sky-100 text-7xl shadow-inner ring-4 ring-white/90 sm:h-44 sm:w-44">
@@ -162,8 +163,9 @@ export default async function PublicDuckPage({ params }: PageProps) {
         <p className="text-center text-xs text-slate-500">No account needed · takes under a minute</p>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-10 space-y-6">
         <PublicPassportShare publicUrl={publicUrl} slug={duck.slug} duckName={duck.name} />
+        <PassportQrSection publicUrl={publicUrl} duckName={duck.name} context="public" />
       </div>
 
       <div className="mt-10">

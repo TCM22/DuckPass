@@ -15,10 +15,11 @@ import {
   PHOTO_INPUT_MAX_BYTES,
   checkinPhotoPath,
   extFromMime,
+  formatImageUploadError,
   imagesStorage,
+  validateImageFileForUpload,
 } from '@/lib/photo-storage';
 import { compressImageForUpload } from '@/lib/image-compress';
-import { recordFinderPhotoForOwner } from '@/lib/record-photo-usage';
 
 const actionOptions = [
   { value: 'found', label: '🦆 I found this duck' },
@@ -61,10 +62,10 @@ export default function CheckInPage() {
     setLoading(true);
 
     let photoUrl: string | null = null;
-    let finderPhotoBytes: number | null = null;
     if (photoFile) {
-      if (photoFile.size > PHOTO_INPUT_MAX_BYTES) {
-        toast.error(`Photo must be ${Math.round(PHOTO_INPUT_MAX_BYTES / (1024 * 1024))} MB or smaller.`);
+      const v = validateImageFileForUpload(photoFile);
+      if (v) {
+        toast.error(v);
         setLoading(false);
         return;
       }
@@ -76,7 +77,6 @@ export default function CheckInPage() {
         setLoading(false);
         return;
       }
-      finderPhotoBytes = uploadFile.size;
       const ext = extFromMime(uploadFile.type);
       const uid =
         typeof crypto !== 'undefined' && crypto.randomUUID
@@ -89,7 +89,7 @@ export default function CheckInPage() {
         upsert: false,
       });
       if (upErr) {
-        toast.error(upErr.message || 'Photo upload failed');
+        toast.error(formatImageUploadError(upErr.message));
         setLoading(false);
         return;
       }
@@ -113,11 +113,6 @@ export default function CheckInPage() {
       toast.error(error.message || 'Something went wrong. Please try again.');
       setLoading(false);
       return;
-    }
-
-    if (finderPhotoBytes !== null) {
-      const { error: usageErr } = await recordFinderPhotoForOwner(supabase, duck.id, finderPhotoBytes);
-      if (usageErr) console.warn('increment_owner_photo_usage_for_duck', usageErr.message);
     }
 
     setSubmitted(true);
@@ -223,7 +218,7 @@ export default function CheckInPage() {
           />
           <div>
             <label htmlFor="finder-photo" className="mb-1.5 block text-sm font-medium text-slate-700">
-              Photo (optional)
+              Photo (optional, one per check-in)
             </label>
             <input
               id="finder-photo"
@@ -234,7 +229,8 @@ export default function CheckInPage() {
               onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
             />
             <p className="mt-1 text-xs text-slate-500">
-              Resized before upload (original up to {Math.round(PHOTO_INPUT_MAX_BYTES / (1024 * 1024))} MB)
+              JPEG, PNG, or WebP · resized before upload (up to {Math.round(PHOTO_INPUT_MAX_BYTES / (1024 * 1024))} MB).
+              No account required to attach a photo.
             </p>
           </div>
           <Button type="submit" loading={loading} className="w-full" size="lg">

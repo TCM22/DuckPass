@@ -15,7 +15,6 @@ export async function ensureProfile(supabase: SupabaseClient): Promise<void> {
     return;
   }
   if (!user) {
-    console.warn('[ensureProfile] no session user');
     return;
   }
 
@@ -32,7 +31,5 @@ export async function ensureProfile(supabase: SupabaseClient): Promise<void> {
 
   if (error) {
     console.error('[ensureProfile] profiles upsert failed', error.message, error);
-  } else {
-    console.log('[ensureProfile] ok for user', user.id);
   }
 }

@@ -1,10 +1,16 @@
 import { headers } from 'next/headers';
+import { getConfiguredSiteOrigin, getPublicSiteUrlFallback } from '@/lib/site-url';
 
 /**
- * Public base URL for the current request (tunnel / ngrok–safe).
- * Prefer forwarded headers from the edge proxy over a static NEXT_PUBLIC_APP_URL.
+ * Base URL for public duck links on the server.
+ * 1) `NEXT_PUBLIC_SITE_URL` or legacy `NEXT_PUBLIC_APP_URL` when set
+ * 2) Else request `Host` / `X-Forwarded-*` (works behind reverse proxies)
+ * 3) Else same default as `getPublicSiteUrlFallback()` in `@/lib/site-url`
  */
 export async function getPublicSiteUrl(): Promise<string> {
+  const configured = getConfiguredSiteOrigin();
+  if (configured) return configured;
+
   const h = await headers();
   const host = h.get('x-forwarded-host') ?? h.get('host');
   const proto =
@@ -16,8 +22,5 @@ export async function getPublicSiteUrl(): Promise<string> {
     return `${safeProto}://${host}`;
   }
 
-  const env = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (env) return env.replace(/\/$/, '');
-
-  return 'http://localhost:3000';
+  return getPublicSiteUrlFallback();
 }

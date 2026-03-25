@@ -33,11 +33,8 @@ export default function SignupPage() {
 
     try {
       const emailTrimmed = email.trim();
-      // Must match the host you use in the browser (localhost vs 127.0.0.1 differ).
-      // Do not use NEXT_PUBLIC_APP_URL here if it points at another host (e.g. prod) — the email link would open a dead URL.
+      // Must match the host you use in the browser (localhost vs 127.0.0.1 differ). Do not substitute a fixed env base URL here unless it matches this origin.
       const origin = window.location.origin;
-
-      console.log('[signup] calling signUp', { email: emailTrimmed, emailRedirectOrigin: origin });
 
       const { data, error } = await supabase.auth.signUp({
         email: emailTrimmed,
@@ -46,12 +43,6 @@ export default function SignupPage() {
           data: { display_name: displayName.trim() },
           emailRedirectTo: `${origin}/auth/callback`,
         },
-      });
-
-      console.log('[signup] signUp result', {
-        hasUser: !!data.user,
-        hasSession: !!data.session,
-        error: error?.message,
       });
 
       if (error) {

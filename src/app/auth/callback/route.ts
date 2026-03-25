@@ -42,10 +42,8 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log('[auth/callback] exchanging code for session');
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      console.log('[auth/callback] session established, redirecting to', next);
       return response;
     }
     console.error('[auth/callback] exchangeCodeForSession failed', error.message, error);

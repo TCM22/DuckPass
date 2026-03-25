@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Dev: allow HMR and RSC when using alternate hosts (127.0.0.1, tunnels like ngrok)
+  // Dev: allow HMR / RSC when using alternate hosts (127.0.0.1, dev tunnels)
   allowedDevOrigins: [
     "127.0.0.1",
     "*.ngrok-free.dev",

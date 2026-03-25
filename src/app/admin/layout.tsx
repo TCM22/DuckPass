@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { BackToDashboardButton } from '@/components/ui/back-to-dashboard-button';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,12 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </h1>
             <p className="text-sm text-slate-500 sm:hidden">Platform stats and moderation</p>
           </div>
-          <Link
-            href="/dashboard"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-sky-800 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 focus-visible:ring-offset-2 active:bg-slate-100 sm:min-h-0 sm:py-2.5"
-          >
-            ← Back to dashboard
-          </Link>
+          <BackToDashboardButton className="sm:pb-0.5" />
         </div>
       </header>
       {children}

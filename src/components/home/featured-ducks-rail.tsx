@@ -134,41 +134,45 @@ function FeaturedCard({ duck }: { duck: FeaturedDuckCard }) {
   return (
     <article
       className={cn(
-        'cq-featured-card flex w-[min(17.5rem,calc(100vw-2.5rem))] sm:w-72 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-amber-100/90 bg-white/95 shadow-[var(--shadow-cq-md)] ring-1 ring-amber-500/5 transition duration-200 hover:border-amber-200/90 hover:shadow-[var(--shadow-cq-lg)]'
+        'cq-featured-card flex h-[24rem] w-[min(17.5rem,calc(100vw-2.5rem))] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-amber-100/90 bg-white/95 shadow-[var(--shadow-cq-md)] ring-1 ring-amber-500/5 transition duration-200 hover:border-amber-200/90 hover:shadow-[var(--shadow-cq-lg)] sm:h-[25.5rem] sm:w-72'
       )}
     >
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-amber-100/80 via-white to-sky-50/90">
+      {/* Fixed 4:3 media slot; absolute img avoids intrinsic dimensions stretching the card */}
+      <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-gradient-to-br from-amber-100/80 via-white to-sky-50/90">
         {duck.photo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={duck.photo_url}
             alt={`${duck.name} — passport photo`}
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover object-center"
             loading="lazy"
             decoding="async"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-6xl opacity-90" aria-hidden>
+          <div
+            className="absolute inset-0 flex h-full w-full items-center justify-center text-6xl opacity-90"
+            aria-hidden
+          >
             🦆
           </div>
         )}
         <span
           className={cn(
-            'absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1',
+            'absolute right-2 top-2 z-[1] rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1',
             statusClass(duck.status)
           )}
         >
           {statusLabel(duck.status)}
         </span>
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 p-4">
         <h3 className="cq-heading line-clamp-2 text-lg font-semibold leading-tight text-slate-900">{duck.name}</h3>
         <p className="line-clamp-2 text-xs leading-relaxed text-slate-600">{voyage}</p>
         <p className="text-xs font-medium text-slate-500">
           <span className="tabular-nums text-slate-700">{duck.check_in_count}</span> finder
           {duck.check_in_count === 1 ? '' : 's'}
         </p>
-        {cta}
+        <div className="mt-auto min-h-10 shrink-0 pt-1">{cta}</div>
       </div>
     </article>
   );
@@ -188,7 +192,7 @@ export function FeaturedDucksRailSkeleton() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-[22rem] w-[min(17.5rem,calc(100vw-2.5rem))] shrink-0 animate-pulse rounded-2xl bg-slate-100/80 sm:w-72"
+            className="h-[24rem] w-[min(17.5rem,calc(100vw-2.5rem))] shrink-0 animate-pulse rounded-2xl bg-slate-100/80 sm:h-[25.5rem] sm:w-72"
           />
         ))}
       </div>
