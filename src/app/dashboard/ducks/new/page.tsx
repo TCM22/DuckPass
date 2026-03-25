@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { generateDuckSlug } from '@/lib/utils';
@@ -22,6 +22,9 @@ import {
   validateImageFileForUpload,
 } from '@/lib/photo-storage';
 import { compressImageForUpload } from '@/lib/image-compress';
+import { perfTimeEnd, perfTimeStart } from '@/lib/perf-log';
+
+const TOAST_ID = 'duck-register';
 
 export default function NewDuckPage() {
   const [name, setName] = useState('');
@@ -32,91 +35,124 @@ export default function NewDuckPage() {
   const [launchDate, setLaunchDate] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const submitInFlightRef = useRef(false);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error('Your duck needs a name!');
-      return;
-    }
-    setLoading(true);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast.error('You must be logged in');
-      router.push('/login');
-      return;
-    }
-
-    const slug = generateDuckSlug();
-
-    const { data: row, error } = await supabase
-      .from('ducks')
-      .insert({
-        owner_id: user.id,
-        slug,
-        name: name.trim(),
-        description: description.trim(),
-        launch_ship: launchShip.trim() || null,
-        launch_cruise: launchCruise.trim() || null,
-        launch_port: launchPort.trim() || null,
-        launch_date: launchDate || null,
-      })
-      .select('id')
-      .single();
-
-    if (error || !row) {
-      toast.error(error?.message || 'Could not create duck');
-      setLoading(false);
-      return;
-    }
-
-    if (photoFile) {
-      const v = validateImageFileForUpload(photoFile);
-      if (v) {
-        toast.error(v);
-        setLoading(false);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (submitInFlightRef.current) return;
+      if (!name.trim()) {
+        toast.error('Your duck needs a name!');
         return;
       }
-      let uploadFile: File;
+
+      submitInFlightRef.current = true;
+      setLoading(true);
+
       try {
-        uploadFile = await compressImageForUpload(photoFile);
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Could not process photo');
-        setLoading(false);
-        return;
-      }
-      const ext = extFromMime(uploadFile.type);
-      const path = duckPhotoPath(user.id, row.id, uniqueImageFilename(ext));
-      const { error: upErr } = await imagesStorage(supabase).upload(path, uploadFile, {
-        contentType: uploadFile.type,
-        cacheControl: '3600',
-        upsert: false,
-      });
-      if (upErr) {
-        toast.error(formatImageUploadError(upErr.message) + ' Duck was still created.');
-      } else {
-        const publicUrl = duckImagePublicUrl(supabase, path);
-        if (!publicUrl?.trim()) {
-          toast.error('Photo uploaded but URL could not be resolved — check NEXT_PUBLIC_SUPABASE_URL.');
-        } else {
-          const { error: photoDbErr } = await supabase
-            .from('ducks')
-            .update({ photo_url: publicUrl })
-            .eq('id', row.id);
-          if (photoDbErr) {
-            toast.error(photoDbErr.message || 'Photo saved to storage but passport could not be updated.');
+        perfTimeStart('createDuck');
+        try {
+          // Prefer session (local) — avoids an extra round-trip vs getUser() when possible.
+          let user = (await supabase.auth.getSession()).data.session?.user ?? null;
+          if (!user) {
+            user = (await supabase.auth.getUser()).data.user;
           }
-        }
-      }
-    }
+          if (!user) {
+            toast.error('You must be logged in', { id: TOAST_ID });
+            router.push('/login');
+            return;
+          }
 
-    toast.success('Duck registered! 🦆');
-    router.push(`/dashboard/ducks/${slug}?new=1`);
-    router.refresh();
-  };
+          const slug = generateDuckSlug();
+
+          const { data: row, error } = await supabase
+            .from('ducks')
+            .insert({
+              owner_id: user.id,
+              slug,
+              name: name.trim(),
+              description: description.trim(),
+              launch_ship: launchShip.trim() || null,
+              launch_cruise: launchCruise.trim() || null,
+              launch_port: launchPort.trim() || null,
+              launch_date: launchDate || null,
+            })
+            .select('id')
+            .single();
+
+          if (error || !row) {
+            toast.error(error?.message || 'Could not create duck', { id: TOAST_ID });
+            return;
+          }
+
+          if (photoFile) {
+            const v = validateImageFileForUpload(photoFile);
+            if (v) {
+              toast.error(v, { id: TOAST_ID });
+              return;
+            }
+            let uploadFile: File;
+            try {
+              uploadFile = await compressImageForUpload(photoFile);
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : 'Could not process photo', { id: TOAST_ID });
+              return;
+            }
+            const ext = extFromMime(uploadFile.type);
+            const path = duckPhotoPath(user.id, row.id, uniqueImageFilename(ext));
+            const { error: upErr } = await imagesStorage(supabase).upload(path, uploadFile, {
+              contentType: uploadFile.type,
+              cacheControl: '3600',
+              upsert: false,
+            });
+            if (upErr) {
+              toast.error(formatImageUploadError(upErr.message) + ' Duck was still created.', { id: TOAST_ID });
+            } else {
+              const publicUrl = duckImagePublicUrl(supabase, path);
+              if (!publicUrl?.trim()) {
+                toast.error('Photo uploaded but URL could not be resolved — check NEXT_PUBLIC_SUPABASE_URL.', {
+                  id: TOAST_ID,
+                });
+              } else {
+                const { error: photoDbErr } = await supabase
+                  .from('ducks')
+                  .update({ photo_url: publicUrl })
+                  .eq('id', row.id);
+                if (photoDbErr) {
+                  toast.error(photoDbErr.message || 'Photo saved to storage but passport could not be updated.', {
+                    id: TOAST_ID,
+                  });
+                }
+              }
+            }
+          }
+
+          // Success toast + navigate right after DB insert succeeds; photo warnings use same toast id above.
+          toast.success('Duck registered! 🦆', { id: TOAST_ID });
+          router.push(`/dashboard/ducks/${slug}?new=1`);
+          router.refresh();
+        } finally {
+          perfTimeEnd('createDuck');
+        }
+      } finally {
+        submitInFlightRef.current = false;
+        setLoading(false);
+      }
+    },
+    [
+      name,
+      description,
+      launchShip,
+      launchCruise,
+      launchPort,
+      launchDate,
+      photoFile,
+      router,
+      supabase,
+    ]
+  );
 
   return (
     <div className="mx-auto max-w-lg">
@@ -137,6 +173,7 @@ export default function NewDuckPage() {
             onChange={(e) => setName(e.target.value)}
             required
             maxLength={80}
+            disabled={loading}
           />
           <Textarea
             id="description"
@@ -145,6 +182,7 @@ export default function NewDuckPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={500}
+            disabled={loading}
           />
           <div>
             <label htmlFor="duck-photo" className="mb-1.5 block text-sm font-medium text-slate-700">
@@ -154,7 +192,8 @@ export default function NewDuckPage() {
               id="duck-photo"
               type="file"
               accept={ACCEPT_IMAGE}
-              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-amber-900 hover:file:bg-amber-200"
+              disabled={loading}
+              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-amber-900 hover:file:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
               onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
             />
             <p className="mt-1 text-xs text-slate-500">
@@ -168,6 +207,7 @@ export default function NewDuckPage() {
             placeholder="Royal Caribbean Oasis of the Seas"
             value={launchShip}
             onChange={(e) => setLaunchShip(e.target.value)}
+            disabled={loading}
           />
           <Input
             id="launchCruise"
@@ -175,6 +215,7 @@ export default function NewDuckPage() {
             placeholder="7-Night Western Caribbean"
             value={launchCruise}
             onChange={(e) => setLaunchCruise(e.target.value)}
+            disabled={loading}
           />
           <Input
             id="launchPort"
@@ -182,6 +223,7 @@ export default function NewDuckPage() {
             placeholder="Port Canaveral, FL"
             value={launchPort}
             onChange={(e) => setLaunchPort(e.target.value)}
+            disabled={loading}
           />
           <Input
             id="launchDate"
@@ -189,9 +231,10 @@ export default function NewDuckPage() {
             type="date"
             value={launchDate}
             onChange={(e) => setLaunchDate(e.target.value)}
+            disabled={loading}
           />
           <Button type="submit" loading={loading} className="w-full" size="lg">
-            Register this duck 🦆
+            {loading ? 'Saving' : 'Register this duck 🦆'}
           </Button>
         </form>
       </Card>

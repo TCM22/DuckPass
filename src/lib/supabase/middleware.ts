@@ -30,9 +30,14 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  const debugMw = process.env.NODE_ENV === 'development';
+  if (debugMw) console.time('authGuard');
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (debugMw) console.timeEnd('authGuard');
 
   const path = request.nextUrl.pathname;
 
@@ -60,6 +65,7 @@ export async function updateSession(request: NextRequest) {
       path.startsWith('/account-suspended'));
 
   if (needsProfileChecks) {
+    if (debugMw) console.time('authGuard:profile');
     // Use select('*') so missing optional columns (e.g. suspended before migration 004) do not
     // fail the whole request — PostgREST returns only columns that exist on the table.
     const { data: profile } = await supabase
@@ -67,6 +73,7 @@ export async function updateSession(request: NextRequest) {
       .select('*')
       .eq('id', user.id)
       .maybeSingle();
+    if (debugMw) console.timeEnd('authGuard:profile');
 
     const role = profile && typeof profile === 'object' && 'role' in profile ? String((profile as { role: string }).role) : undefined;
     const suspended =

@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: [{ url: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' }],
-    apple: [{ url: '/icon-192.svg', sizes: '192x192' }],
+    icon: [{ url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    apple: [{ url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
   },
 };
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { BRAND } from '@/lib/brand';
 import { useAuthModal } from '@/components/auth/auth-modal-context';
@@ -13,7 +13,7 @@ export function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { openAuth } = useAuthModal();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function Header() {
       <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:min-h-16 sm:px-6">
         <Link
           href="/"
-          className="group flex min-w-0 items-center gap-2.5 font-semibold text-slate-900 transition-opacity hover:opacity-90"
+          className="group flex min-w-0 items-center gap-2.5 font-semibold text-slate-900 transition-[transform,opacity] duration-150 hover:opacity-90 active:scale-[0.99] active:opacity-95"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-xl shadow-md shadow-amber-600/20 ring-2 ring-white">
             🦆
@@ -52,19 +52,19 @@ export function Header() {
             <>
               <Link
                 href="/dashboard"
-                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-900 min-[900px]:px-4"
+                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-[transform,opacity,background-color,color] duration-150 hover:bg-amber-50 hover:text-amber-900 active:scale-[0.98] active:opacity-90 min-[900px]:px-4"
               >
                 Dashboard
               </Link>
               <Link
                 href="/dashboard/ducks/new"
-                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-900 min-[900px]:px-4"
+                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-[transform,opacity,background-color,color] duration-150 hover:bg-amber-50 hover:text-amber-900 active:scale-[0.98] active:opacity-90 min-[900px]:px-4"
               >
                 Register duck
               </Link>
               <Link
                 href="/account/settings"
-                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-amber-50 hover:text-amber-900 min-[900px]:px-4"
+                className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-[transform,opacity,background-color,color] duration-150 hover:bg-amber-50 hover:text-amber-900 active:scale-[0.98] active:opacity-90 min-[900px]:px-4"
               >
                 Account
               </Link>
@@ -108,21 +108,21 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 hover:bg-amber-50"
+                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 transition-[transform,opacity,background-color] duration-150 hover:bg-amber-50 active:scale-[0.99] active:opacity-90"
                   onClick={() => setMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/dashboard/ducks/new"
-                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 hover:bg-amber-50"
+                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 transition-[transform,opacity,background-color] duration-150 hover:bg-amber-50 active:scale-[0.99] active:opacity-90"
                   onClick={() => setMenuOpen(false)}
                 >
                   Register duck
                 </Link>
                 <Link
                   href="/account/settings"
-                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 hover:bg-amber-50"
+                  className="rounded-xl px-3 py-3.5 text-base font-medium text-slate-800 transition-[transform,opacity,background-color] duration-150 hover:bg-amber-50 active:scale-[0.99] active:opacity-90"
                   onClick={() => setMenuOpen(false)}
                 >
                   Account

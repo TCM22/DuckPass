@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+/**
+ * Changing this file requires restarting `next dev`. Same for `.env*`, `proxy`/middleware
+ * wiring patterns, and some static asset pipelines. Normal edits under `src/` should hot reload.
+ */
 const nextConfig: NextConfig = {
   // Dev: allow HMR / RSC when using alternate hosts (127.0.0.1, dev tunnels)
   allowedDevOrigins: [

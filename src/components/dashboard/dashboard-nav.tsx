@@ -34,7 +34,7 @@ export function DashboardNav({ isAdmin = false }: { isAdmin?: boolean }) {
             key={href}
             href={href}
             className={cn(
-              'group flex min-h-11 flex-col justify-center rounded-xl px-3 py-2.5 transition-colors',
+              'group flex min-h-11 flex-col justify-center rounded-xl px-3 py-2.5 transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.99] active:opacity-90',
               active
                 ? 'bg-gradient-to-r from-amber-100/90 to-amber-50/80 text-amber-950 ring-1 ring-amber-300/50 shadow-sm'
                 : 'text-slate-600 hover:bg-white/80 hover:text-slate-900'

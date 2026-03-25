@@ -38,7 +38,7 @@ export const buttonSizeStyles: Record<ButtonSize, string> = {
 
 /** Shared base for `<Button />` and anchor-styled CTAs (`linkButtonClass`). */
 export const buttonBaseInteractiveClass =
-  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap text-center font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 active:scale-[0.98]';
+  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap text-center font-semibold select-none transition-[transform,opacity,filter] duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 active:scale-[0.98] active:opacity-[0.92] active:brightness-[0.98]';
 
 export function linkButtonClass(
   variant: ButtonVariant = 'primary',

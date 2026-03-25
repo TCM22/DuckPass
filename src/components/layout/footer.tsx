@@ -16,13 +16,22 @@ export function Footer() {
             </div>
           </div>
           <nav className="flex flex-wrap justify-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/" className="transition-colors hover:text-amber-700">
+            <Link
+              href="/"
+              className="rounded-md transition-[transform,opacity,color] duration-150 hover:text-amber-700 active:scale-[0.98] active:opacity-80"
+            >
               Home
             </Link>
-            <Link href="/login" className="transition-colors hover:text-amber-700">
+            <Link
+              href="/login"
+              className="rounded-md transition-[transform,opacity,color] duration-150 hover:text-amber-700 active:scale-[0.98] active:opacity-80"
+            >
               Log in
             </Link>
-            <Link href="/signup" className="transition-colors hover:text-amber-700">
+            <Link
+              href="/signup"
+              className="rounded-md transition-[transform,opacity,color] duration-150 hover:text-amber-700 active:scale-[0.98] active:opacity-80"
+            >
               Sign up
             </Link>
           </nav>
